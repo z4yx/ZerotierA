@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId "net.kaaass.zerotierfix"
-        minSdkVersion 19
+        minSdkVersion 24
         targetSdkVersion 32
         versionCode 9
         versionName "1.0.5_189"

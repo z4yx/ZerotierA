@@ -79,11 +79,13 @@ import lombok.ToString;
 public class NetworkListFragment extends Fragment {
     public static final int AUTH_VPN = 3;
     public static final String NETWORK_ID_MESSAGE = "com.zerotier.one.network-id";
+    public static final String START_FOR_REASON = "com.zerotier.one.start-reason";
     public static final int START_VPN = 2;
     public static final String TAG = "NetworkListFragment";
     private final EventBus eventBus;
     private final List<Network> mNetworks = new ArrayList<>();
     boolean mIsBound = false;
+    boolean toggleSwitchByQSTile = false;
     private JoinAfterAuth joinAfterAuth;
     private RecyclerViewAdapter recyclerViewAdapter;
     private RecyclerView recyclerView;
@@ -203,6 +205,11 @@ public class NetworkListFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Intent it = getActivity().getIntent();
+        if(it.getIntExtra(START_FOR_REASON, 0) == 1) {
+            toggleSwitchByQSTile = true;
+        }
+
         View view = inflater.inflate(R.layout.fragment_network_list, container, false);
 
         // 空列表提示
@@ -212,7 +219,7 @@ public class NetworkListFragment extends Fragment {
         this.recyclerView = view.findViewById(R.id.joined_networks_list);
         this.recyclerView.setClickable(true);
         this.recyclerView.setLongClickable(true);
-        this.recyclerViewAdapter = new RecyclerViewAdapter(this.mNetworks);
+        this.recyclerViewAdapter = new RecyclerViewAdapter(this.mNetworks, this.toggleSwitchByQSTile);
         this.recyclerViewAdapter.registerAdapterDataObserver(checkIfEmptyObserver);
         this.recyclerView.setAdapter(this.recyclerViewAdapter);
 
@@ -317,6 +324,13 @@ public class NetworkListFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         doUnbindService();
+    }
+
+    private void onNetworkSwitchChanged() {
+        if (toggleSwitchByQSTile) {
+            toggleSwitchByQSTile = false;
+            getActivity().moveTaskToBack(true);
+        }
     }
 
     private List<Network> getNetworkList() {
@@ -614,9 +628,11 @@ public class NetworkListFragment extends Fragment {
     public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
         private final List<Network> mValues;
+        private boolean autoToggleSwitch;
 
-        public RecyclerViewAdapter(List<Network> items) {
+        public RecyclerViewAdapter(List<Network> items, boolean autoToggleSwitch) {
             this.mValues = items;
+            this.autoToggleSwitch = autoToggleSwitch;
             Log.d(NetworkListFragment.TAG, "Created network list item adapter");
         }
 
@@ -632,6 +648,7 @@ public class NetworkListFragment extends Fragment {
         public void onBindViewHolder(final RecyclerViewAdapter.ViewHolder holder, int position) {
             Network network = mValues.get(position);
             holder.mItem = network;
+            Log.d(NetworkListFragment.TAG, "onBindViewHolder position="+position);
             // 设置文本信息
             holder.mNetworkId.setText(network.getNetworkIdStr());
             String networkName = network.getNetworkName();
@@ -648,6 +665,11 @@ public class NetworkListFragment extends Fragment {
             holder.mSwitch.setOnCheckedChangeListener(null);
             holder.mSwitch.setChecked(network.getConnected());
             holder.mSwitch.setOnCheckedChangeListener(holder::onSwitchCheckedChanged);
+
+            if (autoToggleSwitch) {
+                autoToggleSwitch = false;
+                holder.mSwitch.setChecked(!network.getConnected());
+            }
         }
 
         @Override
@@ -734,6 +756,7 @@ public class NetworkListFragment extends Fragment {
              * 点击开启网络开关
              */
             public void onSwitchCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.i(TAG, "Network switch is changed to " + isChecked);
                 NetworkDao networkDao = ((ZerotierFixApplication) NetworkListFragment.this.getActivity().getApplication()).getDaoSession().getNetworkDao();
                 if (isChecked) {
                     // 启动网络
@@ -786,6 +809,7 @@ public class NetworkListFragment extends Fragment {
                     networkDao.save(this.mItem);
                     NetworkListFragment.this.mVNC = null;
                 }
+                NetworkListFragment.this.onNetworkSwitchChanged();
             }
         }
     }
