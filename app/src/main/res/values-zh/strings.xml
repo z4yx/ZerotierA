@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Zerotier Fix</string>
+    <string name="app_name">零级</string>
     <string name="button_connect">连接</string>
     <string name="button_disconnect">断开连接</string>
     <string name="custom_dns">DNS 服务器</string>
     <string name="custom_dns_tab_title">自定义 DNS</string>
-    <string name="default_route">通过 ZeroTier 路由所有流量（需要对网络进行额外配置）</string>
+    <string name="default_route">通过零级路由所有流量（需要对网络进行额外配置）</string>
     <string name="delete_network">删除</string>
     <string name="device_label">设备:</string>
     <string name="dns_label_string">DNS</string>
@@ -19,7 +19,7 @@
     <string name="menu_join_network">添加网络</string>
     <string name="network_bridging">网络桥接</string>
     <string name="network_broadcast">广播</string>
-    <string name="network_default_route">通过 ZeroTier 路由</string>
+    <string name="network_default_route">通过零级路由</string>
     <string name="network_dns_tab_title">网络 DNS</string>
     <string name="network_dns_text">通过网络控制台管理 DNS 配置</string>
     <string name="network_id">网络 ID:</string>
@@ -46,7 +46,7 @@
     <string name="no_dns_text">将不会配置 DNS。</string>
     <string name="planet_settings">Planet 设置</string>
     <string name="preferences_general">通用设置</string>
-    <string name="preferences_general_start_on_boot">开机时启动 ZeroTier Fix</string>
+    <string name="preferences_general_start_on_boot">开机时启动</string>
     <string name="preferences_network">网络设置</string>
     <string name="preferences_network_auto_rejoin">打开时自动重新加入网络</string>
     <string name="preferences_network_disable_ipv6">禁用 IPv6</string>
@@ -55,12 +55,12 @@
     <string name="reset_planet">重置 Planet</string>
     <string name="settings">设置</string>
     <string name="status_label">状态:</string>
-    <string name="title_activity_zero_tier_one__main">ZeroTier 客户端</string>
+    <string name="title_activity_zero_tier_one__main">零级客户端</string>
     <string name="use_custom_dns">使用自定义 DNS 服务器</string>
     <string name="status_offline">已断开</string>
     <string name="status_online">已连接</string>
-    <string name="toast_no_network">没有网络连接，无法启动 ZeroTier</string>
-    <string name="toast_mobile_data">设备正在使用移动网络，必须开启“允许移动网络下使用”选项以启动 ZeroTier</string>
+    <string name="toast_no_network">没有网络连接，无法启动零级</string>
+    <string name="toast_mobile_data">设备正在使用移动网络，必须开启“允许移动网络下使用”选项以启动零级</string>
     <string name="toast_not_authorized">无权使用该网络</string>
     <string name="menu_peers">结点列表</string>
     <string name="menu_orbit">入轨</string>
@@ -116,7 +116,7 @@
     <string name="planet_wrong_format">Planet 文件格式错误</string>
     <string name="downloading">下载中</string>
     <string name="planet_download_timeout">下载 Planet 文件超时</string>
-    <string name="planet_use_custom_summary">可以让客户端完全隔离 Zerotier 官方服务器。需手动重连使配置生效。</string>
+    <string name="planet_use_custom_summary">可以让客户端完全隔离零级官方服务器。需手动重连使配置生效。</string>
     <string name="import_via_orbit">通过入轨导入</string>
     <string name="import_moon_node">导入 Moon 结点</string>
     <string name="wait_to_fetch">等待获取</string>
@@ -125,6 +125,6 @@
     <string name="external_file">外部文件</string>
     <string name="cached">已缓存</string>
     <string name="moon_wrong_file_format">Moon 文件格式错误</string>
-    <string name="moon_world_id_hint">Moon 结点的 Zerotier 地址。即 Moon 文件的文件名（不包含扩展名）。</string>
+    <string name="moon_world_id_hint">Moon 结点的零级地址。即 Moon 文件的文件名（不包含扩展名）。</string>
     <string name="cached_moon_file_delete">已删除缓存的 Moon 文件。需手动重连使配置生效。</string>
 </resources>
