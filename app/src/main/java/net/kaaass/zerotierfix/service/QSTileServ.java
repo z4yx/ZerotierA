@@ -11,6 +11,7 @@ import com.zerotier.sdk.Version;
 import net.kaaass.zerotierfix.R;
 import net.kaaass.zerotierfix.events.NodeDestroyedEvent;
 import net.kaaass.zerotierfix.events.NodeStatusEvent;
+import net.kaaass.zerotierfix.events.RequestNodeStatusEvent;
 import net.kaaass.zerotierfix.ui.NetworkListActivity;
 import net.kaaass.zerotierfix.ui.NetworkListFragment;
 import net.kaaass.zerotierfix.util.StringUtils;
@@ -24,21 +25,22 @@ public class QSTileServ extends TileService {
 
     public QSTileServ() {
         this.eventBus = EventBus.getDefault();
-        this.eventBus.register(this);
+//        this.eventBus.register(this);
     }
 
-//    @Override
-//    public void onCreate() {
-//        super.onCreate();
-//        Log.i(TAG, "called onStartListening");
-//        this.eventBus.register(this);
-//    }
-//    @Override
-//    public void onDestroy() {
-//        super.onDestroy();
-//        Log.i(TAG, "called onStopListening");
-//        this.eventBus.unregister(this);
-//    }
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i(TAG, "onStartListening");
+        this.eventBus.register(this);
+        this.eventBus.post(new RequestNodeStatusEvent());
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onStopListening");
+        this.eventBus.unregister(this);
+    }
 
     @Override
     public void onClick() {

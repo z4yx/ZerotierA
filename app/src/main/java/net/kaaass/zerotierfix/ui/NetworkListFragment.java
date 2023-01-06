@@ -77,6 +77,10 @@ import lombok.ToString;
 
 // TODO: clear up
 public class NetworkListFragment extends Fragment {
+    class PendingAction {
+        boolean toggleSwitchByQSTile = false;
+        boolean hideActivityAutomatically = false;
+    }
     public static final int AUTH_VPN = 3;
     public static final String NETWORK_ID_MESSAGE = "com.zerotier.one.network-id";
     public static final String START_FOR_REASON = "com.zerotier.one.start-reason";
@@ -85,7 +89,8 @@ public class NetworkListFragment extends Fragment {
     private final EventBus eventBus;
     private final List<Network> mNetworks = new ArrayList<>();
     boolean mIsBound = false;
-    boolean toggleSwitchByQSTile = false;
+    boolean nodeStatus = false;
+    private PendingAction pendingAction = new PendingAction();
     private JoinAfterAuth joinAfterAuth;
     private RecyclerViewAdapter recyclerViewAdapter;
     private RecyclerView recyclerView;
@@ -205,10 +210,10 @@ public class NetworkListFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Intent it = getActivity().getIntent();
-        if(it.getIntExtra(START_FOR_REASON, 0) == 1) {
-            toggleSwitchByQSTile = true;
-        }
+//        Intent it = getActivity().getIntent();
+//        if(it.getIntExtra(START_FOR_REASON, 0) == 1) {
+//            toggleSwitchByQSTile = true;
+//        }
 
         View view = inflater.inflate(R.layout.fragment_network_list, container, false);
 
@@ -219,7 +224,7 @@ public class NetworkListFragment extends Fragment {
         this.recyclerView = view.findViewById(R.id.joined_networks_list);
         this.recyclerView.setClickable(true);
         this.recyclerView.setLongClickable(true);
-        this.recyclerViewAdapter = new RecyclerViewAdapter(this.mNetworks, this.toggleSwitchByQSTile);
+        this.recyclerViewAdapter = new RecyclerViewAdapter(this.mNetworks, this.pendingAction);
         this.recyclerViewAdapter.registerAdapterDataObserver(checkIfEmptyObserver);
         this.recyclerView.setAdapter(this.recyclerViewAdapter);
 
@@ -266,6 +271,18 @@ public class NetworkListFragment extends Fragment {
     @Override // androidx.fragment.app.Fragment
     public void onResume() {
         super.onResume();
+        Intent it = getActivity().getIntent();
+        int startReason = it.getIntExtra(START_FOR_REASON, 0);
+        Log.i(TAG, "NetworkListFragment.onResume START_FOR_REASON=" + startReason);
+        if (startReason == 1) {
+            pendingAction.toggleSwitchByQSTile = true;
+            pendingAction.hideActivityAutomatically = true;
+        } else {
+            pendingAction.toggleSwitchByQSTile = false;
+            pendingAction.hideActivityAutomatically = false;
+        }
+        getActivity().setIntent(new Intent());
+
         this.nodeStatusView.setText(R.string.status_offline);
         this.eventBus.post(IsServiceRunningEvent.NewRequest());
         updateNetworkListAndNotify();
@@ -327,8 +344,8 @@ public class NetworkListFragment extends Fragment {
     }
 
     private void onNetworkSwitchChanged() {
-        if (toggleSwitchByQSTile) {
-            toggleSwitchByQSTile = false;
+        if (pendingAction.hideActivityAutomatically) {
+            pendingAction.hideActivityAutomatically = false;
             getActivity().moveTaskToBack(true);
         }
     }
@@ -492,6 +509,7 @@ public class NetworkListFragment extends Fragment {
             if (this.nodeIdView != null) {
                 this.nodeIdView.setText(Long.toHexString(status.getAddres()));
             }
+            nodeStatus = true;
         } else {
             setOfflineState();
         }
@@ -511,6 +529,7 @@ public class NetworkListFragment extends Fragment {
         if (textView != null) {
             textView.setText(R.string.status_offline);
         }
+        nodeStatus = false;
     }
 
     /**
@@ -628,11 +647,11 @@ public class NetworkListFragment extends Fragment {
     public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
         private final List<Network> mValues;
-        private boolean autoToggleSwitch;
+        private PendingAction pendingAction;
 
-        public RecyclerViewAdapter(List<Network> items, boolean autoToggleSwitch) {
+        public RecyclerViewAdapter(List<Network> items, PendingAction pendingAction) {
             this.mValues = items;
-            this.autoToggleSwitch = autoToggleSwitch;
+            this.pendingAction = pendingAction;
             Log.d(NetworkListFragment.TAG, "Created network list item adapter");
         }
 
@@ -666,9 +685,10 @@ public class NetworkListFragment extends Fragment {
             holder.mSwitch.setChecked(network.getConnected());
             holder.mSwitch.setOnCheckedChangeListener(holder::onSwitchCheckedChanged);
 
-            if (autoToggleSwitch) {
-                autoToggleSwitch = false;
-                holder.mSwitch.setChecked(!network.getConnected());
+            if (pendingAction.toggleSwitchByQSTile) {
+                Log.i(TAG, "Toggle network switch");
+                pendingAction.toggleSwitchByQSTile = false;
+                holder.mSwitch.setChecked(!holder.mSwitch.isChecked());
             }
         }
 
