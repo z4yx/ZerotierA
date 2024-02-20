@@ -28,9 +28,14 @@
     <string name="network_ips">Managed IPs</string>
     <string name="network_mac">MAC</string>
     <string name="network_mtu">MTU</string>
+    <string name="network_dns_mode">DNS Mode</string>
+    <string name="network_dns_mode_no_dns">No DNS</string>
+    <string name="network_dns_mode_network_dns">Network DNS</string>
+    <string name="network_dns_mode_custom_dns">Custom DNS</string>
     <string name="network_name">Network Name:</string>
     <string name="network_name_string">Network Name:</string>
     <string name="network_status">Status</string>
+    <string name="network_status_not_connected">Not Connected</string>
     <string name="network_status_access_denied">Access Denied</string>
     <string name="network_status_client_too_old">Client Out of Date</string>
     <string name="network_status_not_found">Network Not Found</string>
@@ -38,6 +43,7 @@
     <string name="network_status_port_error">Port Error</string>
     <string name="network_status_requesting_configuration">Requesting Configuration</string>
     <string name="network_status_unknown">Unknown</string>
+    <string name="network_status_authentication_required">Authentication Required</string>
     <string name="network_type">Type</string>
     <string name="network_type_label">Type:</string>
     <string name="network_type_private">Private</string>
@@ -62,7 +68,6 @@
     <string name="status_online">ONLINE</string>
     <string name="toast_no_network">No Network Connectivity.  ZeroTier cannot start.</string>
     <string name="toast_mobile_data">Currently using mobile data.  Enable \"Use Cellular Data\" in order to start ZeroTier.</string>
-    <string name="toast_not_authorized">Not Authorized for network</string>
     <string name="menu_peers">Peers</string>
     <string name="menu_orbit">Orbit</string>
     <string name="enabled">Enabled</string>
@@ -80,7 +85,7 @@
     <string name="moon_orbit_exist">Moon Orbit information exists!</string>
     <string name="moon_orbit_add_success">Moon orbit added successfully.</string>
     <string name="moon_orbit_delete_success">Moon orbit deleted successfully. Disconnect &amp; reconnect for this setting to take effect.</string>
-    <string name="unknown_version" translatable="false">-</string>
+    <string name="unknown_version" translatable="false">-.-.-</string>
     <string name="network_connected">Connected</string>
     <string name="connected_to_network">Connected to %s</string>
     <string name="network_detail">Network Detail</string>
@@ -110,7 +115,8 @@
     <string name="import_via_file">Import via file</string>
     <string name="url">URL</string>
     <string name="import_via_url">Import via URL</string>
-    <string name="cannot_copy_planet">Cannot copy planet file.</string>
+    <string name="cannot_open_planet">Cannot open planet file.</string>
+    <string name="cannot_open_moon">Cannot open moon file.</string>
     <string name="set_planet_file">Set planet file</string>
     <string name="wrong_url_format">Wrong url format</string>
     <string name="cannot_download_planet_file">Cannot download planet file</string>
@@ -129,4 +135,22 @@
     <string name="moon_wrong_file_format">Wrong moon file format</string>
     <string name="moon_world_id_hint">Zerotier address of Moon node. Also filename of its moon file.</string>
     <string name="cached_moon_file_delete">Cached moon file deleted. Reconnect for this setting to take effect.</string>
+    <string name="channel_name">Connection Status Notify</string>
+    <string name="channel_description">Connection Status</string>
+    <string name="notification_title_connected">Connected</string>
+    <string name="notification_text_connected">Connected to: %1$s</string>
+    <string name="toast_vpn_application_not_prepared">VPN application is not prepared or is revoked.</string>
+    <string name="toast_network_status_ok">Successfully connected to network %1$s</string>
+    <string name="toast_network_status_access_denied">Cannot connect to network %1$s: Access denied</string>
+    <string name="toast_network_status_not_found">Cannot connect to network %1$s: Network does not exist</string>
+    <string name="toast_network_status_port_error">Cannot connect to network %1$s: Port error</string>
+    <string name="toast_network_status_client_too_old">Cannot connect to network %1$s: Client version too low</string>
+    <string name="toast_network_status_authentication_required">Cannot connect to network %1$s: Authorization required</string>
+    <string name="toast_vpn_error">A VPN service error has occurred! %1$s</string>
+    <string name="empty_network_name">Unknown</string>
+    <string name="app_version_format">(APP: %s)</string>
+    <string name="dialog_no_notification_alert_text">Zerotier Fix does not have notification permissions! You might miss notification pop-ups and status bar messages that indicate connection status. Zerotier Fix recommends you enable notification permissions for the app to receive connection status information. If you don\'t want to see persistent notifications in the status bar, you can still turn off messages for that notification category after enabling the permissions.</string>
+    <string name="dialog_no_notification_alert_title">Notification Permission Not Granted</string>
+    <string name="open_notification_settings">Goto notification settings</string>
+    <string name="dont_show_again">Don\'t show again</string>
 </resources>

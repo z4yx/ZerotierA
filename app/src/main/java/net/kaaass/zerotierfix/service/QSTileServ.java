@@ -11,7 +11,7 @@ import com.zerotier.sdk.Version;
 import net.kaaass.zerotierfix.R;
 import net.kaaass.zerotierfix.events.NodeDestroyedEvent;
 import net.kaaass.zerotierfix.events.NodeStatusEvent;
-import net.kaaass.zerotierfix.events.RequestNodeStatusEvent;
+import net.kaaass.zerotierfix.events.NodeStatusRequestEvent;
 import net.kaaass.zerotierfix.ui.NetworkListActivity;
 import net.kaaass.zerotierfix.ui.NetworkListFragment;
 import net.kaaass.zerotierfix.util.StringUtils;
@@ -33,7 +33,7 @@ public class QSTileServ extends TileService {
         super.onCreate();
         Log.i(TAG, "onStartListening");
         this.eventBus.register(this);
-        this.eventBus.post(new RequestNodeStatusEvent());
+        this.eventBus.post(new NodeStatusRequestEvent());
     }
     @Override
     public void onDestroy() {

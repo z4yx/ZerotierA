@@ -15,6 +15,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
@@ -46,22 +49,65 @@ public class PrefsFragment extends PreferenceFragmentCompat implements SharedPre
 
     public static final int PLANET_DOWNLOAD_CONN_TIMEOUT = 5 * 1000;
     public static final int PLANET_DOWNLOAD_TIMEOUT = 10 * 1000;
-    private static final int REQUEST_PLANET_FILE = 42;
     private static final String TAG = "PreferencesFragment";
     /**
      * Plant 文件固定头
      */
     private static final byte[] PLANET_FILE_HEADER = new byte[]{
-            0x01, 0x00, 0x00, 0x00, 0x00, 0x08, (byte) 0xea, (byte) 0xc9, 0x0a
+            0x01,  // World type, 0x01 = planet
     };
     private SwitchPreference prefPlanetUseCustom;
     private Preference prefSetPlanetFile;
     private Dialog planetDialog = null;
     private Dialog loadingDialog = null;
+    private ActivityResultLauncher<Intent> planetFileSelectLauncher = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        // 初始化 Planet 文件选择结果回调
+        this.planetFileSelectLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), (activityResult) -> {
+            var result = activityResult.getResultCode();
+            var data = activityResult.getData();
+            if (result == -1 && data != null) {
+                // Planet 自定义文件设置
+                Uri uriData = data.getData();
+                if (uriData == null) {
+                    Log.e(TAG, "Invalid planet URI");
+                    return;
+                }
+                // 复制文件
+                try (InputStream in = requireContext().getContentResolver().openInputStream(uriData)) {
+                    FileUtils.copyInputStreamToFile(in, FileUtil.tempFile(requireContext()));
+                    boolean success = dealTempPlanetFile();
+                    if (!success) {
+                        // 校验失败
+                        Toast.makeText(getContext(), R.string.planet_wrong_format, Toast.LENGTH_LONG).show();
+                        closePlanetDialog();
+                        return;
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Cannot copy planet file", e);
+                    // 设置失败
+                    Toast.makeText(getContext(), R.string.cannot_open_planet, Toast.LENGTH_LONG).show();
+                    closePlanetDialog();
+                    return;
+                } finally {
+                    FileUtil.clearTempFile(requireContext());
+                }
+                Log.i(TAG, "Copy planet file successfully");
+                // 关闭对话框
+                Snackbar.make(requireView(), R.string.set_planet_succ, BaseTransientBottomBar.LENGTH_LONG).show();
+                closePlanetDialog();
+            } else {
+                Toast.makeText(getContext(), R.string.cannot_open_planet, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
@@ -75,20 +121,21 @@ public class PrefsFragment extends PreferenceFragmentCompat implements SharedPre
         Objects.requireNonNull(this.prefPlanetUseCustom).setOnPreferenceClickListener(preference -> {
             // 判断状态
             updatePlanetSetting();
-            if (!preference.getSharedPreferences().getBoolean(Constants.PREF_PLANET_USE_CUSTOM, false)) {
+            var pref = preference.getSharedPreferences();
+            if (pref == null || !pref.getBoolean(Constants.PREF_PLANET_USE_CUSTOM, false)) {
                 // 设置为假时直接退出
                 return true;
             }
             // 设置为真时，如果还没有设置文件则提示设置文件
             if (customPlanetFileNotExit()) {
-                showPlanetFileDialog();
+                showPlanetDialog();
             }
             return true;
         });
 
         // 打开 Plant 文件设置
         Objects.requireNonNull(this.prefSetPlanetFile).setOnPreferenceClickListener(preference -> {
-            showPlanetFileDialog();
+            showPlanetDialog();
             return true;
         });
         updatePlanetSetting();
@@ -97,38 +144,42 @@ public class PrefsFragment extends PreferenceFragmentCompat implements SharedPre
     /**
      * 显示选择 Planet 文件来源对话框
      */
-    private void showPlanetFileDialog() {
+    private void showPlanetDialog() {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_custom_planet_select, null);
 
         // 选择文件
         View viewFile = view.findViewById(R.id.from_file);
-        viewFile.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("*/*");
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            startActivityForResult(intent, REQUEST_PLANET_FILE);
-        });
+        viewFile.setOnClickListener(v -> this.showPlanetFromFileDialog());
 
         // 选择 URL
         View viewUrl = view.findViewById(R.id.from_url);
-        viewUrl.setOnClickListener(v -> this.showPlanetUrlDialog());
+        viewUrl.setOnClickListener(v -> this.showPlanetFromUrlDialog());
 
         // 窗口
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
                 .setView(view)
                 .setTitle(R.string.load_planet_file)
-                .setOnCancelListener(dialog -> {
-                    closePlanetDialog();
-                });
+                .setOnCancelListener(dialog -> closePlanetDialog());
 
         this.planetDialog = builder.create();
         this.planetDialog.show();
     }
 
     /**
+     * 显示选择 Planet 文件的文件选择器
+     */
+    private void showPlanetFromFileDialog() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        this.planetFileSelectLauncher.launch(intent);
+    }
+
+    /**
      * 显示输入 Planet 文件 URL 对话框
      */
-    private void showPlanetUrlDialog() {
+    private void showPlanetFromUrlDialog() {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_planet_url, null);
 
         final EditText editText = view.findViewById(R.id.planet_url);
@@ -174,11 +225,11 @@ public class PrefsFragment extends PreferenceFragmentCompat implements SharedPre
                             Log.e(TAG, "Cannot download planet file", e);
                             // 设置失败
                             requireActivity().runOnUiThread(() -> {
-                                int messsage = R.string.cannot_download_planet_file;
+                                int message = R.string.cannot_download_planet_file;
                                 if (e instanceof SocketTimeoutException) {
-                                    messsage = R.string.planet_download_timeout;
+                                    message = R.string.planet_download_timeout;
                                 }
-                                Toast.makeText(getContext(), messsage, Toast.LENGTH_LONG).show();
+                                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                                 closePlanetDialog();
                                 closeLoadingDialog();
                             });
@@ -211,42 +262,6 @@ public class PrefsFragment extends PreferenceFragmentCompat implements SharedPre
             if (sharedPreferences.getBoolean(Constants.PREF_NETWORK_USE_CELLULAR_DATA, false)) {
                 requireActivity().startService(new Intent(getActivity(), ZeroTierOneService.class));
             }
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_PLANET_FILE && resultCode == -1 && data != null) {
-            // Planet 自定义文件设置
-            Uri uriData = data.getData();
-            if (uriData == null) {
-                Log.e(TAG, "Invalid planet URI");
-                return;
-            }
-            // 复制文件
-            Context context = requireContext();
-            try (InputStream in = context.getContentResolver().openInputStream(uriData)) {
-                FileUtils.copyInputStreamToFile(in, FileUtil.tempFile(requireContext()));
-                boolean success = dealTempPlanetFile();
-                if (!success) {
-                    // 校验失败
-                    Toast.makeText(getContext(), R.string.planet_wrong_format, Toast.LENGTH_LONG).show();
-                    closePlanetDialog();
-                    return;
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "Cannot copy planet file", e);
-                // 设置失败
-                Toast.makeText(getContext(), R.string.cannot_copy_planet, Toast.LENGTH_LONG).show();
-                closePlanetDialog();
-                return;
-            } finally {
-                FileUtil.clearTempFile(requireContext());
-            }
-            Log.i(TAG, "Copy planet file successfully");
-            // 关闭对话框
-            Snackbar.make(requireView(), R.string.set_planet_succ, BaseTransientBottomBar.LENGTH_LONG).show();
-            closePlanetDialog();
         }
     }
 

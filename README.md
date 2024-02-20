@@ -11,6 +11,12 @@
   <img src="screenshots/moons.png" alt="moons" width="150"/>
 </p>
 
+<p align="center">
+    <a href="https://github.com/kaaass/ZerotierFix/actions/workflows/build-app.yml">
+        <img src="https://github.com/kaaass/ZerotierFix/actions/workflows/build-app.yml/badge.svg" alt="Build APP"/>
+    </a>
+</p>
+
 ## Features
 
 - Self-hosted Moon Support
@@ -20,16 +26,18 @@
 
 ## Download
 
-Check [Releases page](https://github.com/kaaass/ZerotierFix/releases) for newest apk built.
+Check [Releases page](https://github.com/kaaass/ZerotierFix/releases) for latest version.
+
+If you want to try the nightly build, you can download it from [GitHub Actions](https://github.com/kaaass/ZerotierFix/actions/workflows/build-app.yml?query=branch%3Amaster).
+But please note that the nightly build may be **BUGGY** and **UNSTABLE**.
 
 ## Copyright
 
 The code for this repository is based on the reverse engineering of the official Android client. The
 original author is Grant Limberg (glimberg@gmail.com). See [AUTHORS.md](https://github.com/zerotier/ZeroTierOne/blob/master/AUTHORS.md#primary-authors) for more details.
 
-- Zerotier JNI Sdk is located in `com.zerotier.sdk`
+- Zerotier JNI Sdk is located in git submodule `externals/core`
 - Original Android client code is located in `net.kaaass.zerotierfix` (renamed from `com.zerotier.one`)
-- Pre-built JNI library binary is located in `app/src/main/jniLibs`. This will be replaced by source code in the future
 - App logo is a trademark of `ZeroTier, Inc.` and made by myself. 
 
 
@@ -38,6 +46,6 @@ original author is Grant Limberg (glimberg@gmail.com). See [AUTHORS.md](https://
 - [X] Add moon config persistent & file config
 - [x] Add peer list view
 - [x] Support planet config
-- [ ] *WIP* Rewrite & update UI to fit Material Design
-- [ ] Replace pre-built JNI library
-- [ ] *WIP* Clear up code (remove decompiler tag and refine)
+- [x] Replace pre-built JNI library
+- [x] Rewrite & update UI to fit Material Design
+- [ ] *WIP* Rewrite whole APP in v2
