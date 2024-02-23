@@ -67,7 +67,6 @@
     <string name="status_online">已连接</string>
     <string name="toast_no_network">没有网络连接，无法启动零级</string>
     <string name="toast_mobile_data">设备正在使用移动网络，必须开启“允许移动网络下使用”选项以启动零级</string>
-    <string name="toast_not_authorized">无权使用该网络</string>
     <string name="menu_peers">结点列表</string>
     <string name="menu_orbit">入轨</string>
     <string name="enabled">启用</string>
