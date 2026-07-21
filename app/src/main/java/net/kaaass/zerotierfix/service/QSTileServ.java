@@ -58,9 +58,23 @@ public class QSTileServ extends TileService {
 //        tile.setState(st==Tile.STATE_INACTIVE ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
 //        tile.updateTile();
     }
+    
+    @Override
+    public void onStartListening() {
+        super.onStartListening();
+        Log.i(TAG, "QS start listening");
+        this.eventBus.post(new NodeStatusRequestEvent());
+    }
+    
+    // @Override
+    // public void onStopListening() {
+    //     super.onStopListening();
+    // }
+    
 
     private  void setQsTileState(boolean isActive) {
         Tile tile = getQsTile();
+        if (tile == null) return;
         if (isActive) {
             tile.setState(Tile.STATE_ACTIVE);
         } else {

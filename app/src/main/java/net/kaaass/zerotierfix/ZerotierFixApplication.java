@@ -1,5 +1,7 @@
 package net.kaaass.zerotierfix;
 
+import android.content.ComponentName;
+import android.service.quicksettings.TileService;
 import android.util.Log;
 
 import androidx.multidex.MultiDexApplication;
@@ -7,6 +9,7 @@ import androidx.multidex.MultiDexApplication;
 import net.kaaass.zerotierfix.model.DaoMaster;
 import net.kaaass.zerotierfix.model.DaoSession;
 import net.kaaass.zerotierfix.model.ZTOpenHelper;
+import net.kaaass.zerotierfix.service.QSTileServ;
 
 /**
  * 主程序入口
@@ -24,6 +27,8 @@ public class ZerotierFixApplication extends MultiDexApplication {
                 new ZTOpenHelper(this, "ztfixdb", null)
                         .getWritableDatabase()
         ).newSession();
+
+        TileService.requestListeningState(this, new ComponentName(this, QSTileServ.class));
     }
 
     public DaoSession getDaoSession() {
