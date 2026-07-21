@@ -31,14 +31,14 @@ public class QSTileServ extends TileService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "onStartListening");
+        Log.i(TAG, "onCreate");
         this.eventBus.register(this);
         this.eventBus.post(new NodeStatusRequestEvent());
     }
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "onStopListening");
+        Log.i(TAG, "onDestroy");
         this.eventBus.unregister(this);
     }
 
@@ -66,10 +66,11 @@ public class QSTileServ extends TileService {
         this.eventBus.post(new NodeStatusRequestEvent());
     }
     
-    // @Override
-    // public void onStopListening() {
-    //     super.onStopListening();
-    // }
+    @Override
+    public void onStopListening() {
+        Log.i(TAG, "QS stop listening");
+        super.onStopListening();
+    }
     
 
     private  void setQsTileState(boolean isActive) {
