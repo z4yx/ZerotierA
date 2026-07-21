@@ -22,6 +22,7 @@ import org.greenrobot.eventbus.ThreadMode;
 public class QSTileServ extends TileService {
     public static final String TAG = "QSTileServ";
     private final EventBus eventBus;
+    private boolean cachedState = false;
 
     public QSTileServ() {
         this.eventBus = EventBus.getDefault();
@@ -48,6 +49,13 @@ public class QSTileServ extends TileService {
 
         Log.i(TAG, "Clicking the QS tile");
 
+        Tile tile = getQsTile();
+        if(tile != null) {
+            // 短暂的不可用状态
+            tile.setState(Tile.STATE_UNAVAILABLE);
+            tile.updateTile();
+        }
+
         Intent it = new Intent(this, NetworkListActivity.class);
         it.putExtra(NetworkListFragment.START_FOR_REASON, 1);
         it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -63,16 +71,16 @@ public class QSTileServ extends TileService {
     public void onStartListening() {
         super.onStartListening();
         Log.i(TAG, "QS start listening");
+        setQsTileState(cachedState);
         this.eventBus.post(new NodeStatusRequestEvent());
     }
     
-    @Override
-    public void onStopListening() {
-        Log.i(TAG, "QS stop listening");
-        super.onStopListening();
-    }
+    // @Override
+    // public void onStopListening() {
+    //     Log.i(TAG, "QS stop listening");
+    //     super.onStopListening();
+    // }
     
-
     private  void setQsTileState(boolean isActive) {
         Tile tile = getQsTile();
         if (tile == null) return;
@@ -93,7 +101,10 @@ public class QSTileServ extends TileService {
     public void onNodeStatus(NodeStatusEvent event) {
         NodeStatus status = event.getStatus();
         Log.i(TAG, "called onNodeStatus, isOnline="+status.isOnline());
+
+        if(!status.isOnline() && !cachedState) return;
         // 更新在线状态
+        cachedState = status.isOnline();
         setQsTileState(status.isOnline());
     }
 
@@ -101,6 +112,8 @@ public class QSTileServ extends TileService {
     public void onNodeDestroyed(NodeDestroyedEvent nodeDestroyedEvent) {
         Log.i(TAG, "called onNodeDestroyed");
 
+        // 离线状态
+        cachedState = false;
         setQsTileState(false);
     }
 }
