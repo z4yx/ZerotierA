@@ -97,7 +97,7 @@ public class QSTileServ extends TileService {
      * 节点状态事件回调
      * @param event 事件
      */
-    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNodeStatus(NodeStatusEvent event) {
         NodeStatus status = event.getStatus();
         Log.i(TAG, "called onNodeStatus, isOnline="+status.isOnline());
@@ -108,7 +108,7 @@ public class QSTileServ extends TileService {
         setQsTileState(status.isOnline());
     }
 
-    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNodeDestroyed(NodeDestroyedEvent nodeDestroyedEvent) {
         Log.i(TAG, "called onNodeDestroyed");
 

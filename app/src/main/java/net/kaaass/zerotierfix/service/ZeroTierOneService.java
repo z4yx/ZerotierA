@@ -10,6 +10,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -474,7 +476,9 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
             }
             this.vpnSocket = null;
         }
+        Log.i(TAG, "this.node");
         if (this.node != null) {
+            Log.i(TAG, "Post NodeDestroyedEvent");
             this.eventBus.post(new NodeDestroyedEvent());
             this.node.close();
             this.node = null;
@@ -490,20 +494,17 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
         }
     }
 
+/*
+    @Override
     public void onDestroy() {
         try {
             stopZeroTier();
             if (this.vpnSocket != null) {
-                try {
-                    this.vpnSocket.close();
-                } catch (Exception e) {
-                    Log.e(TAG, "Error closing VPN socket: " + e, e);
-                }
-                this.vpnSocket = null;
+                Log.e(TAG, "vpnSocket not null");
             }
             stopSelf(this.mStartID);
             if (this.eventBus.isRegistered(this)) {
-                this.eventBus.unregister(this);
+                Log.e(TAG, "eventBus not unregistered");
             }
         } catch (Exception e) {
             Log.e(TAG, e.toString(), e);
@@ -511,20 +512,17 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
             super.onDestroy();
         }
     }
+*/
 
+    @Override
     public void onRevoke() {
         stopZeroTier();
         if (this.vpnSocket != null) {
-            try {
-                this.vpnSocket.close();
-            } catch (Exception e) {
-                Log.e(TAG, "Error closing VPN socket: " + e, e);
-            }
-            this.vpnSocket = null;
+            Log.e(TAG, "vpnSocket not null");
         }
         stopSelf(this.mStartID);
         if (this.eventBus.isRegistered(this)) {
-            this.eventBus.unregister(this);
+            Log.e(TAG, "eventBus not unregistered");
         }
         super.onRevoke();
     }
@@ -611,12 +609,7 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
         }
         stopZeroTier();
         if (this.vpnSocket != null) {
-            try {
-                this.vpnSocket.close();
-            } catch (Exception e) {
-                Log.e(TAG, "Error closing VPN socket", e);
-            }
-            this.vpnSocket = null;
+            Log.e(TAG, "vpnSocket not null");
         }
         stopSelf(this.mStartID);
     }
@@ -768,12 +761,7 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
     protected void shutdown() {
         stopZeroTier();
         if (this.vpnSocket != null) {
-            try {
-                this.vpnSocket.close();
-            } catch (Exception e) {
-                Log.e(TAG, "Error closing VPN socket", e);
-            }
-            this.vpnSocket = null;
+            Log.e(TAG, "vpnSocket not null");
         }
         stopSelf(this.mStartID);
     }
@@ -1058,6 +1046,19 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
 
         public ZeroTierOneService getService() {
             return ZeroTierOneService.this;
+        }
+
+        @Override
+        public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+                throws RemoteException {
+            // 拦截并处理 IBinder.LAST_CALL_TRANSACTION
+            if (code == IBinder.LAST_CALL_TRANSACTION) {
+                // 手动调用 onRevoke() 逻辑
+                onRevoke();
+                // 返回true表示消息已被处理
+                return true;
+            }
+            return super.onTransact(code, data, reply, flags);
         }
     }
 }
